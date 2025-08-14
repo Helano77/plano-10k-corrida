@@ -267,15 +267,6 @@ const RunningPlan: React.FC = () => {
 
   return (
     <>
-      {/* Floating Change User Button */}
-      <button
-        onClick={handleChangeUser}
-        className="fixed top-4 right-4 z-10 bg-white text-blue-600 border border-blue-300 px-3 py-2 rounded-lg shadow-lg hover:bg-blue-50 hover:border-blue-400 transition-colors text-sm font-medium"
-        title={`Usuário atual: @${username}`}
-      >
-        Trocar usuário
-      </button>
-      
       <div className="max-w-5xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-green-50">
       <div className="text-center mb-8">
         <div className="flex flex-col items-center gap-3 mb-2">
@@ -488,6 +479,17 @@ const RunningPlan: React.FC = () => {
             <p><strong>Semana 16:</strong> Completará 10K em Zona 3 (157-176 bpm) com sorriso no rosto! 🎉</p>
           </div>
         </div>
+      </div>
+      
+      {/* Change User Button at page end */}
+      <div className="mt-10 flex justify-center">
+        <button
+          onClick={handleChangeUser}
+          className="bg-white text-blue-600 border border-blue-300 px-4 py-2 rounded-lg shadow hover:bg-blue-50 hover:border-blue-400 transition-colors text-sm font-medium"
+          title={`Usuário atual: @${username}`}
+        >
+          Trocar usuário
+        </button>
       </div>
     </div>
     </>
