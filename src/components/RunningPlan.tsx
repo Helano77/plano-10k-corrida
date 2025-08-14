@@ -21,9 +21,24 @@ type Week = {
   workouts: Workout[];
 };
 
+const USERNAME_STORAGE_KEY = 'running_plan_username';
+
 const useUsername = (): [string, (username: string) => void] => {
   const [username, setUsername] = useState<string>('');
-  return [username, setUsername];
+  
+  useEffect(() => {
+    const saved = localStorage.getItem(USERNAME_STORAGE_KEY);
+    if (saved) {
+      setUsername(saved);
+    }
+  }, []);
+  
+  const saveUsername = (newUsername: string) => {
+    setUsername(newUsername);
+    localStorage.setItem(USERNAME_STORAGE_KEY, newUsername);
+  };
+  
+  return [username, saveUsername];
 };
 
 const RunningPlan: React.FC = () => {
@@ -292,7 +307,22 @@ const RunningPlan: React.FC = () => {
       }
     }
   };
+  
+  const handleChangeUser = () => {
+    localStorage.removeItem(USERNAME_STORAGE_KEY);
+    setUsername('');
+    setUsernameInput('');
+    setShowUsernameForm(true);
+  };
 
+  useEffect(() => {
+    if (username && showUsernameForm) {
+      setShowUsernameForm(false);
+    } else if (!username && !showUsernameForm) {
+      setShowUsernameForm(true);
+    }
+  }, [username, showUsernameForm]);
+  
   if (showUsernameForm) {
     return (
       <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg mt-20">
@@ -341,17 +371,19 @@ const RunningPlan: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-green-50">
+    <>
+      {/* Floating Change User Button */}
+      <button
+        onClick={handleChangeUser}
+        className="fixed top-4 right-4 z-10 bg-white text-blue-600 border border-blue-300 px-3 py-2 rounded-lg shadow-lg hover:bg-blue-50 hover:border-blue-400 transition-colors text-sm font-medium"
+        title={`Usuário atual: @${username}`}
+      >
+        Trocar usuário
+      </button>
+      
+      <div className="max-w-5xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-green-50">
       <div className="text-center mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-4xl font-bold text-gray-800">🏃‍♂️ Seu Plano Personalizado 10K</h1>
-          <button
-            onClick={() => setShowUsernameForm(true)}
-            className="text-sm text-blue-600 hover:text-blue-800 underline"
-          >
-            Trocar usuário (@{username})
-          </button>
-        </div>
+        <h1 className="text-4xl font-bold text-gray-800 mb-2">🏃‍♂️ Seu Plano Personalizado 10K</h1>
         <p className="text-lg text-gray-600 mb-2">16 semanas para correr 10km confortavelmente</p>
         <p className="text-sm text-blue-600 font-medium">Adaptado para seu nível atual: 1km contínuo {'\u2192'} 10km confortável</p>
 
@@ -554,6 +586,7 @@ const RunningPlan: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
