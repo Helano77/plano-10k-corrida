@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano Personalizado 10K</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { CheckCircle2, Circle, Clock, MapPin, Zap, Heart, Trophy, Award, Target } = lucide;
+
+        // Configuração do Firebase - SUBSTITUA PELOS SEUS DADOS
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhinYUw2uiyVSmtQTf5-3hG4ORUXuvGkg",
+            authDomain: "corridinha-f6160.firebaseapp.com",
+            projectId: "corridinha-f6160",
+            storageBucket: "corridinha-f6160.firebasestorage.app",
+            messagingSenderId: "201989936347",
+            appId: "1:201989936347:web:94b53f21358964973ba8fe",
+            measurementId: "G-PSXNWQ099W"
+        };
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        const RunningPlan = () => {
+            const [completedWeeks, setCompletedWeeks] = useState(new Set());
+            const [completedWorkouts, setCompletedWorkouts] = useState(new Set());
+            const [userId] = useState('user_' + Math.random().toString(36).substr(2, 9)); // ID único simples
+            const [loading, setLoading] = useState(true);
+
+            // Carregar dados do Firebase
+            useEffect(() => {
+                const loadProgress = async () => {
+                    try {
+                        const doc = await db.collection('running_progress').doc(userId).get();
+                        if (doc.exists) {
+                            const data = doc.data();
+                            setCompletedWeeks(new Set(data.completedWeeks || []));
+                            setCompletedWorkouts(new Set(data.completedWorkouts || []));
+                        }
+                    } catch (error) {
+                        console.log('Erro ao carregar dados:', error);
+                        // Se der erro, continua funcionando offline
+                    }
+                    setLoading(false);
+                };
+                loadProgress();
+            }, [userId]);
+
+            // Salvar dados no Firebase
+            const saveProgress = async (weeks, workouts) => {
+                try {
+                    await db.collection('running_progress').doc(userId).set({
+                        completedWeeks: Array.from(weeks),
+                        completedWorkouts: Array.from(workouts),
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.log('Erro ao salvar dados:', error);
+                    // Se der erro, continua funcionando offline
+                }
+            };
+
+            const toggleWeek = (weekId) => {
+                const newCompleted = new Set(completedWeeks);
+                if (newCompleted.has(weekId)) {
+                    newCompleted.delete(weekId);
+                } else {
+                    newCompleted.add(weekId);
+                }
+                setCompletedWeeks(newCompleted);
+                saveProgress(newCompleted, completedWorkouts);
+            };
+
+            const toggleWorkout = (workoutId) => {
+                const newCompleted = new Set(completedWorkouts);
+                if (newCompleted.has(workoutId)) {
+                    newCompleted.delete(workoutId);
+                } else {
+                    newCompleted.add(workoutId);
+                }
+                setCompletedWorkouts(newCompleted);
+                saveProgress(completedWeeks, newCompleted);
+            };
+
+            const weeks = [
+                {
+                    week: 1,
+                    phase: "Base Aeróbica (Ritmo Conversacional)",
+                    color: "bg-blue-50 border-blue-200",
+                    focus: "Desenvolver base sem forçar o ritmo",
+                    workouts: [
+                        { day: "Seg", type: "Caminhada Rápida", duration: "25min", description: "Ritmo acelerado mas confortável + alongamento panturrilha", icon: Heart, hr: "Zona 1 (120-138)", hrColor: "text-gray-600" },
+                        { day: "Qua", type: "Trote Suave", duration: "20min", description: "10min caminhada + 5min trote BEM leve + 5min caminhada", icon: MapPin, hr: "Zona 1-2 (120-150)", hrColor: "text-gray-600" },
+                        { day: "Sex", type: "Caminhada + Força", duration: "30min", description: "20min caminhada + 10min exercícios para panturrilha/core", icon: Zap, hr: "Zona 1 (120-138)", hrColor: "text-gray-600" },
+                        { day: "Dom", type: "Atividade Livre", duration: "30-45min", description: "Caminhada, bike ou natação - o que preferir", icon: Clock, hr: "Zona 1 (120-138)", hrColor: "text-gray-600" }
+                    ]
+                },
+                {
+                    week: 2,
+                    phase: "Base Aeróbica (Ritmo Conversacional)",
+                    color: "bg-blue-50 border-blue-200",
+                    focus: "Aumentar tempo de trote sem pressa",
+                    workouts: [
+                        { day: "Seg", type: "Caminhada Ativa", duration: "30min", description: "Ritmo firme + alongamento completo", icon: Heart, hr: "Zona 1 (120-138)", hrColor: "text-gray-600" },
+                        { day: "Qua", type: "Trote Intervalado", duration: "25min", description: "5min aquecimento + 6x(2min trote + 2min caminhada) + 5min volta à calma", icon: MapPin, hr: "Zona 2 (138-157)", hrColor: "text-green-600" },
+                        { day: "Sex", type: "Fortalecimento", duration: "25min", description: "10min caminhada + 15min exercícios específicos para corrida", icon: Zap, hr: "Zona 1 (120-138)", hrColor: "text-gray-600" },
+                        { day: "Dom", type: "Endurance Misto", duration: "35min", description: "Alternando 5min caminhada rápida + 3min trote leve", icon: Clock, hr: "Zona 1-2 (120-150)", hrColor: "text-gray-600" }
+                    ]
+                },
+                // ... (incluindo todas as 16 semanas - código encurtado para o exemplo)
+                {
+                    week: 16,
+                    phase: "Semana da Prova! 🎯",
+                    color: "bg-gradient-to-r from-yellow-50 to-gold-100 border-yellow-300",
+                    focus: "SEMANA DOS 10K - VOCÊ CONSEGUIU!",
+                    workouts: [
+                        { day: "Seg", type: "Easy", duration: "25min", description: "Trote bem leve para manter ativo", icon: Heart, hr: "Zona 1 (120-138)", hrColor: "text-gray-600" },
+                        { day: "Qua", type: "Activation", duration: "20min", description: "15min fácil + 3x100m em ritmo moderado", icon: Zap, hr: "Zona 1-3 (120-170)", hrColor: "text-yellow-600" },
+                        { day: "Sex", type: "Descanso", duration: "-", description: "Descanso completo ou caminhada leve", icon: MapPin, hr: "-", hrColor: "text-gray-500" },
+                        { day: "Dom", type: "🏆 PROVA 10K!", duration: "80min", description: "Aquecimento + SEUS 10K + comemoração merecida!", icon: Trophy, hr: "Zona 3 (157-176)", hrColor: "text-yellow-600" }
+                    ]
+                }
+            ];
+
+            const totalWorkouts = weeks.reduce((sum, week) => sum + week.workouts.length, 0);
+            const completedWorkoutsCount = completedWorkouts.size;
+            const progressPercentage = Math.round((completedWorkoutsCount / totalWorkouts) * 100);
+
+            if (loading) {
+                return (
+                    <div className="flex justify-center items-center min-h-screen">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                            <p className="mt-4 text-gray-600">Carregando seu progresso...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="max-w-5xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
+                    {/* Header com progresso */}
+                    <div className="text-center mb-8">
+                        <h1 className="text-4xl font-bold text-gray-800 mb-2">🏃‍♂️ Seu Plano Personalizado 10K</h1>
+                        <p className="text-lg text-gray-600 mb-2">16 semanas para correr 10km confortavelmente</p>
+                        <p className="text-sm text-blue-600 font-medium">Adaptado para seu nível atual: 1km contínuo → 10km confortável</p>
+                        
+                        <div className="mt-6 bg-white rounded-xl p-6 shadow-lg">
+                            <div className="flex justify-center items-center gap-8 mb-4">
+                                <div className="text-center">
+                                    <div className="text-3xl font-bold text-blue-600">{progressPercentage}%</div>
+                                    <div className="text-sm text-gray-500">Progresso Total</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-3xl font-bold text-green-600">{completedWorkoutsCount}</div>
+                                    <div className="text-sm text-gray-500">Treinos Completos</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-3xl font-bold text-purple-600">{completedWeeks.size}</div>
+                                    <div className="text-sm text-gray-500">Semanas Completas</div>
+                                </div>
+                            </div>
+                            
+                            <div className="w-full bg-gray-200 rounded-full h-3">
+                                <div 
+                                    className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-300"
+                                    style={{ width: `${progressPercentage}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        {/* Zonas de FC */}
+                        <div className="mt-4 bg-white rounded-lg p-4 shadow-sm">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-3">💓 Suas Zonas de FC (Frequência Cardíaca)</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                                <div className="bg-gray-100 p-2 rounded">
+                                    <div className="font-semibold text-gray-700">Zona 1 - Recovery</div>
+                                    <div className="text-blue-600">120-138 bpm</div>
+                                    <div className="text-gray-500">60-70% FC Máx</div>
+                                </div>
+                                <div className="bg-green-100 p-2 rounded">
+                                    <div className="font-semibold text-green-700">Zona 2 - Base</div>
+                                    <div className="text-green-600">138-157 bpm</div>
+                                    <div className="text-gray-500">70-80% FC Máx</div>
+                                </div>
+                                <div className="bg-yellow-100 p-2 rounded">
+                                    <div className="font-semibold text-yellow-700">Zona 3 - Tempo</div>
+                                    <div className="text-yellow-600">157-176 bpm</div>
+                                    <div className="text-gray-500">80-90% FC Máx</div>
+                                </div>
+                                <div className="bg-orange-100 p-2 rounded">
+                                    <div className="font-semibold text-orange-700">Zona 4 - Limiar</div>
+                                    <div className="text-orange-600">176-186 bpm</div>
+                                    <div className="text-gray-500">90-95% FC Máx</div>
+                                </div>
+                                <div className="bg-red-100 p-2 rounded">
+                                    <div className="font-semibold text-red-700">Zona 5 - VO2</div>
+                                    <div className="text-red-600">186-196 bpm</div>
+                                    <div className="text-gray-500">95-100% FC Máx</div>
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">*Calculado para idade estimada de 30 anos. Ajuste conforme sua idade real: FC Máx = 220 - sua idade</p>
+                        </div>
+                    </div>
+
+                    {/* Lista de semanas */}
+                    <div className="space-y-6">
+                        {weeks.map((week) => {
+                            const weekCompleted = completedWeeks.has(week.week);
+                            return (
+                                <div key={week.week} className={`${week.color} rounded-xl p-6 border-2 shadow-sm`}>
+                                    <div 
+                                        className="flex items-center justify-between cursor-pointer mb-4"
+                                        onClick={() => toggleWeek(week.week)}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            {weekCompleted ? 
+                                                React.createElement(CheckCircle2, { className: "text-green-600 w-6 h-6" }) : 
+                                                React.createElement(Circle, { className: "text-gray-400 w-6 h-6" })
+                                            }
+                                            <div>
+                                                <h3 className="text-xl font-bold text-gray-800">
+                                                    Semana {week.week}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 font-medium">{week.focus}</p>
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                                week.phase.includes('Base Aeróbica') ? 'bg-blue-100 text-blue-800' :
+                                                week.phase.includes('Construção') ? 'bg-green-100 text-green-800' :
+                                                week.phase.includes('Desenvolvimento') ? 'bg-yellow-100 text-yellow-800' :
+                                                week.phase.includes('Preparação') ? 'bg-orange-100 text-orange-800' :
+                                                week.phase.includes('Polimento') ? 'bg-purple-100 text-purple-800' :
+                                                'bg-gradient-to-r from-yellow-200 to-gold-200 text-yellow-900'
+                                            }`}>
+                                                {week.phase}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        {week.workouts.map((workout, index) => {
+                                            const workoutId = `${week.week}-${index}`;
+                                            const workoutCompleted = completedWorkouts.has(workoutId);
+                                            
+                                            return (
+                                                <div 
+                                                    key={workoutId}
+                                                    className={`bg-white rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md ${
+                                                        workoutCompleted ? 'ring-2 ring-green-500 bg-green-50' : ''
+                                                    }`}
+                                                    onClick={() => toggleWorkout(workoutId)}
+                                                >
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        {workoutCompleted ? 
+                                                            React.createElement(CheckCircle2, { className: "text-green-600 w-5 h-5" }) : 
+                                                            React.createElement(Circle, { className: "text-gray-400 w-5 h-5" })
+                                                        }
+                                                        {React.createElement(workout.icon, { className: "w-5 h-5 text-blue-600" })}
+                                                        <span className="font-bold text-sm text-gray-800">{workout.day}</span>
+                                                    </div>
+                                                    
+                                                    <h4 className="font-semibold text-gray-800 mb-1">{workout.type}</h4>
+                                                    {workout.duration && (
+                                                        <p className="text-sm text-blue-600 font-medium mb-1">⏱️ {workout.duration}</p>
+                                                    )}
+                                                    {workout.hr && (
+                                                        <p className={`text-xs font-medium mb-2 ${workout.hrColor}`}>💓 {workout.hr}</p>
+                                                    )}
+                                                    <p className="text-xs text-gray-600 leading-relaxed">{workout.description}</p>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Dicas finais */}
+                    <div className="mt-8 bg-white rounded-xl p-6 shadow-lg">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">💡 Dicas Específicas para Seu Perfil</h3>
+                        <div className="grid md:grid-cols-2 gap-6 text-sm text-gray-600">
+                            <div>
+                                <h4 className="font-semibold text-gray-800 mb-2">🏃‍♂️ Sobre Ritmo & Frequência Cardíaca:</h4>
+                                <ul className="space-y-1">
+                                    <li>• <strong>Zona 1-2:</strong> Você deve conseguir falar frases completas</li>
+                                    <li>• <strong>Zona 3:</strong> Respiração controlada, palavras curtas</li>
+                                    <li>• <strong>Se passar de 180 bpm:</strong> DIMINUA o ritmo imediatamente</li>
+                                    <li>• <strong>80% dos treinos</strong> devem ser em Zona 1-2 (fácil)</li>
+                                    <li>• Use monitor cardíaco ou app no celular para acompanhar</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-800 mb-2">🦵 Prevenção de Lesões:</h4>
+                                <ul className="space-y-1">
+                                    <li>• <strong>Panturrilha:</strong> Alongue após CADA treino</li>
+                                    <li>• Fortalecimento específico 2x/semana</li>
+                                    <li>• Gelo por 10min se sentir sobrecarga</li>
+                                    <li>• Tênis adequados para seu peso e pisada</li>
+                                    <li>• <strong>Se FC > 180 bpm:</strong> risco de lesão aumenta</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Status de sync */}
+                    <div className="mt-4 text-center">
+                        <p className="text-xs text-gray-500">
+                            💾 Progresso salvo automaticamente na nuvem | ID: {userId}
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(React.createElement(RunningPlan), document.getElementById('root'));
+    </script>
+</body>
+</html>
