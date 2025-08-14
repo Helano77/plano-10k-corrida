@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Circle, Clock, MapPin, Zap, Heart, Trophy, Award, Target } from 'lucide-react';
 import { db } from '../firebase';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import plan10kJson from '../treinos/10k.json';
+import plan5kSub25Json from '../treinos/5k-sub-25.json';
 
 type Workout = {
   day: string;
@@ -22,6 +24,72 @@ type Week = {
 };
 
 const USERNAME_STORAGE_KEY = 'running_plan_username';
+const PLAN_STORAGE_KEY = 'running_plan_selected_plan';
+
+type WorkoutJson = {
+  day: string;
+  type: string;
+  duration?: string;
+  description: string;
+  icon?: string;
+  hr?: string;
+  hrColor?: string;
+};
+
+type WeekJson = {
+  week: number;
+  phase: string;
+  color: string;
+  focus: string;
+  workouts: WorkoutJson[];
+};
+
+type PlanJson = {
+  treino: WeekJson[];
+};
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Heart,
+  MapPin,
+  Zap,
+  Clock,
+  Target,
+  Trophy,
+  Award,
+};
+
+const convertPlanJsonToWeeks = (plan: PlanJson): Week[] => {
+  return (plan?.treino || []).map((w) => ({
+    week: w.week,
+    phase: w.phase,
+    color: w.color,
+    focus: w.focus,
+    workouts: (w.workouts || []).map((wo) => ({
+      day: wo.day,
+      type: wo.type,
+      duration: wo.duration,
+      description: wo.description,
+      icon: wo.icon && iconMap[wo.icon] ? iconMap[wo.icon] : Heart,
+      hr: wo.hr,
+      hrColor: wo.hrColor,
+    })),
+  }));
+};
+
+const plans: Record<string, { id: string; name: string; description: string; data: PlanJson }> = {
+  '10k': {
+    id: '10k',
+    name: 'Plano 10K',
+    description: '16 semanas para correr 10km confortavelmente',
+    data: plan10kJson as PlanJson,
+  },
+  '5k-sub-25': {
+    id: '5k-sub-25',
+    name: 'Plano 5K Sub-25',
+    description: '16 semanas para correr 5km abaixo de 25min',
+    data: plan5kSub25Json as PlanJson,
+  },
+};
 
 const useUsername = (): [string, (username: string) => void] => {
   const [username, setUsername] = useState<string>('');
@@ -41,6 +109,21 @@ const useUsername = (): [string, (username: string) => void] => {
   return [username, saveUsername];
 };
 
+const useSelectedPlanId = (): [string, (planId: string) => void] => {
+  const [planId, setPlanId] = useState<string>('10k');
+  useEffect(() => {
+    const saved = localStorage.getItem(PLAN_STORAGE_KEY);
+    if (saved && plans[saved]) {
+      setPlanId(saved);
+    }
+  }, []);
+  const savePlanId = (newPlanId: string) => {
+    setPlanId(newPlanId);
+    localStorage.setItem(PLAN_STORAGE_KEY, newPlanId);
+  };
+  return [planId, savePlanId];
+};
+
 const RunningPlan: React.FC = () => {
   const [completedWeeks, setCompletedWeeks] = useState<Set<number>>(new Set());
   const [completedWorkouts, setCompletedWorkouts] = useState<Set<string>>(new Set());
@@ -48,213 +131,24 @@ const RunningPlan: React.FC = () => {
   const [username, setUsername] = useUsername();
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [showUsernameForm, setShowUsernameForm] = useState<boolean>(true);
+  const [selectedPlanId, setSelectedPlanId] = useSelectedPlanId();
 
-  const weeks: Week[] = useMemo(() => [
-    {
-      week: 1,
-      phase: 'Base Aeróbica (Ritmo Conversacional)',
-      color: 'bg-blue-50 border-blue-200',
-      focus: 'Desenvolver base sem forçar o ritmo',
-      workouts: [
-        { day: 'Seg', type: 'Caminhada Rápida', duration: '25min', description: 'Ritmo acelerado mas confortável + alongamento panturrilha', icon: Heart, hr: 'Zona 1 (120-138)', hrColor: 'text-gray-600' },
-        { day: 'Qua', type: 'Trote Suave', duration: '20min', description: '10min caminhada + 5min trote BEM leve + 5min caminhada', icon: MapPin, hr: 'Zona 1-2 (120-150)', hrColor: 'text-gray-600' },
-        { day: 'Sex', type: 'Caminhada + Força', duration: '30min', description: '20min caminhada + 10min exercícios para panturrilha/core', icon: Zap, hr: 'Zona 1 (120-138)', hrColor: 'text-gray-600' },
-        { day: 'Dom', type: 'Atividade Livre', duration: '30-45min', description: 'Caminhada, bike ou natação - o que preferir', icon: Clock, hr: 'Zona 1 (120-138)', hrColor: 'text-gray-600' },
-      ],
-    },
-    {
-      week: 2,
-      phase: 'Base Aeróbica (Ritmo Conversacional)',
-      color: 'bg-blue-50 border-blue-200',
-      focus: 'Aumentar tempo de trote sem pressa',
-      workouts: [
-        { day: 'Seg', type: 'Caminhada Ativa', duration: '30min', description: 'Ritmo firme + alongamento completo', icon: Heart, hr: 'Zona 1 (120-138)', hrColor: 'text-gray-600' },
-        { day: 'Qua', type: 'Trote Intervalado', duration: '25min', description: '5min aquecimento + 6x(2min trote + 2min caminhada) + 5min volta à calma', icon: MapPin, hr: 'Zona 2 (138-157)', hrColor: 'text-green-600' },
-        { day: 'Sex', type: 'Fortalecimento', duration: '25min', description: '10min caminhada + 15min exercícios específicos para corrida', icon: Zap, hr: 'Zona 1 (120-138)', hrColor: 'text-gray-600' },
-        { day: 'Dom', type: 'Endurance Misto', duration: '35min', description: 'Alternando 5min caminhada rápida + 3min trote leve', icon: Clock, hr: 'Zona 1-2 (120-150)', hrColor: 'text-gray-600' },
-      ],
-    },
-    {
-      week: 3,
-      phase: 'Base Aeróbica (Ritmo Conversacional)',
-      color: 'bg-blue-50 border-blue-200',
-      focus: 'Primeiro trote contínuo de 10 minutos',
-      workouts: [
-        { day: 'Seg', type: 'Recuperação Ativa', duration: '25min', description: 'Caminhada leve + mobilidade articular', icon: Heart, hr: 'Zona 1 (120-138)', hrColor: 'text-gray-600' },
-        { day: 'Qua', type: 'Trote Contínuo', duration: '30min', description: '10min aquecimento + 10min trote contínuo + 10min caminhada', icon: Target, hr: 'Zona 2 (138-157)', hrColor: 'text-green-600' },
-        { day: 'Sex', type: 'Força + Mobilidade', duration: '30min', description: 'Exercícios funcionais + alongamento profundo', icon: Zap, hr: 'Zona 1 (120-138)', hrColor: 'text-gray-600' },
-        { day: 'Dom', type: 'Volume Baixo', duration: '40min', description: 'Alternando 3min trote + 2min caminhada por todo tempo', icon: Clock, hr: 'Zona 2 (138-157)', hrColor: 'text-green-600' },
-      ],
-    },
-    {
-      week: 4,
-      phase: 'Base Aeróbica (Ritmo Conversacional)',
-      color: 'bg-blue-50 border-blue-200',
-      focus: 'Consolidar 15min de trote contínuo',
-      workouts: [
-        { day: 'Seg', type: 'Easy Recovery', duration: '25min', description: 'Caminhada regenerativa + exercícios leves', icon: Heart },
-        { day: 'Qua', type: 'Trote Base', duration: '35min', description: '10min aquecimento + 15min trote contínuo + 10min volta à calma', icon: Target },
-        { day: 'Sex', type: 'Cross Training', duration: '30min', description: 'Fortalecimento geral + core stability', icon: Zap },
-        { day: 'Dom', type: 'Long Easy', duration: '45min', description: 'Ritmo bem confortável, alternando conforme necessário', icon: Clock },
-      ],
-    },
-    {
-      week: 5,
-      phase: 'Construção de Base',
-      color: 'bg-green-50 border-green-200',
-      focus: '20min de trote contínuo - marco importante!',
-      workouts: [
-        { day: 'Seg', type: 'Recovery', duration: '30min', description: 'Caminhada + alongamento específico', icon: Heart },
-        { day: 'Qua', type: 'Milestone Run', duration: '40min', description: '10min aquecimento + 20min trote contínuo + 10min caminhada', icon: Award },
-        { day: 'Sex', type: 'Strength', duration: '35min', description: 'Trabalho de força para corredores', icon: Zap },
-        { day: 'Dom', type: 'Endurance Build', duration: '50min', description: 'Volume maior em ritmo bem confortável', icon: Clock },
-      ],
-    },
-    {
-      week: 6,
-      phase: 'Construção de Base',
-      color: 'bg-green-50 border-green-200',
-      focus: 'Aumentar confiança nos 25min contínuos',
-      workouts: [
-        { day: 'Seg', type: 'Active Recovery', duration: '30min', description: 'Movimento suave + mobilidade', icon: Heart },
-        { day: 'Qua', type: 'Steady Run', duration: '45min', description: '10min aquecimento + 25min trote + 10min volta à calma', icon: Target },
-        { day: 'Sex', type: 'Functional', duration: '35min', description: 'Exercícios específicos + prevenção', icon: Zap },
-        { day: 'Dom', type: 'Long Base', duration: '55min', description: 'Construindo resistência em ritmo conversacional', icon: Clock },
-      ],
-    },
-    {
-      week: 7,
-      phase: 'Construção de Base',
-      color: 'bg-green-50 border-green-200',
-      focus: '30min contínuos - você está evoluindo!',
-      workouts: [
-        { day: 'Seg', type: 'Easy Day', duration: '30min', description: 'Regeneração completa', icon: Heart },
-        { day: 'Qua', type: 'Base Run', duration: '50min', description: '10min aquecimento + 30min trote + 10min volta à calma', icon: Award },
-        { day: 'Sex', type: 'Strength', duration: '35min', description: 'Manter força específica', icon: Zap },
-        { day: 'Dom', type: 'Volume Day', duration: '60min', description: 'Maior volume da semana em ritmo fácil', icon: Clock },
-      ],
-    },
-    {
-      week: 8,
-      phase: 'Construção de Base',
-      color: 'bg-green-50 border-green-200',
-      focus: 'Consolidar base - 35min sem parar',
-      workouts: [
-        { day: 'Seg', type: 'Recovery', duration: '30min', description: 'Foco na recuperação', icon: Heart },
-        { day: 'Qua', type: 'Solid Base', duration: '55min', description: '10min aquecimento + 35min trote + 10min volta à calma', icon: Target },
-        { day: 'Sex', type: 'Cross + Core', duration: '35min', description: 'Trabalho complementar', icon: Zap },
-        { day: 'Dom', type: 'Long Easy', duration: '65min', description: 'Volume em ritmo muito confortável', icon: Clock },
-      ],
-    },
-    {
-      week: 9,
-      phase: 'Desenvolvimento de Resistência',
-      color: 'bg-yellow-50 border-yellow-200',
-      focus: 'Primeiro teste de 5K contínuo',
-      workouts: [
-        { day: 'Seg', type: 'Easy', duration: '30min', description: 'Preparação para teste', icon: Heart },
-        { day: 'Qua', type: 'Teste 5K', duration: '50min', description: 'Aquecimento + 5K em ritmo confortável + volta à calma', icon: Trophy },
-        { day: 'Sex', type: 'Recovery', duration: '25min', description: 'Regeneração pós-teste', icon: MapPin },
-        { day: 'Dom', type: 'Long Run', duration: '60min', description: 'Volume longo em ritmo bem fácil', icon: Clock },
-      ],
-    },
-    {
-      week: 10,
-      phase: 'Desenvolvimento de Resistência',
-      color: 'bg-yellow-50 border-yellow-200',
-      focus: 'Trabalhar variações de ritmo suaves',
-      workouts: [
-        { day: 'Seg', type: 'Base Run', duration: '35min', description: 'Trote base confortável', icon: Heart },
-        { day: 'Qua', type: 'Fartlek Suave', duration: '45min', description: 'Aquecimento + 25min variando entre confortável e moderado + volta à calma', icon: Zap },
-        { day: 'Sex', type: 'Easy', duration: '30min', description: 'Recuperação ativa', icon: MapPin },
-        { day: 'Dom', type: 'Progressive', duration: '65min', description: 'Começar fácil e terminar em ritmo moderado', icon: Clock },
-      ],
-    },
-    {
-      week: 11,
-      phase: 'Desenvolvimento de Resistência',
-      color: 'bg-yellow-50 border-yellow-200',
-      focus: 'Aumentar tempo total de corrida',
-      workouts: [
-        { day: 'Seg', type: 'Recovery', duration: '30min', description: 'Trote regenerativo', icon: Heart },
-        { day: 'Qua', type: 'Tempo Moderado', duration: '50min', description: 'Aquecimento + 25min em ritmo moderadamente firme + volta à calma', icon: Target },
-        { day: 'Sex', type: 'Easy', duration: '35min', description: 'Manter volume fácil', icon: MapPin },
-        { day: 'Dom', type: 'Long Steady', duration: '70min', description: 'Seu maior volume até aqui', icon: Clock },
-      ],
-    },
-    {
-      week: 12,
-      phase: 'Desenvolvimento de Resistência',
-      color: 'bg-yellow-50 border-yellow-200',
-      focus: 'Teste de 7K - você está quase lá!',
-      workouts: [
-        { day: 'Seg', type: 'Easy', duration: '35min', description: 'Preparação tranquila', icon: Heart },
-        { day: 'Qua', type: 'Teste 7K', duration: '60min', description: 'Aquecimento + 7K contínuo + volta à calma', icon: Trophy },
-        { day: 'Sex', type: 'Recovery', duration: '30min', description: 'Regeneração pós-teste', icon: MapPin },
-        { day: 'Dom', type: 'Volume', duration: '65min', description: 'Manter volume em ritmo fácil', icon: Clock },
-      ],
-    },
-    {
-      week: 13,
-      phase: 'Preparação Específica',
-      color: 'bg-orange-50 border-orange-200',
-      focus: 'Trabalho específico para 10K',
-      workouts: [
-        { day: 'Seg', type: 'Base', duration: '40min', description: 'Trote base sólido', icon: Heart },
-        { day: 'Qua', type: 'Ritmo 10K', duration: '55min', description: 'Aquecimento + 4x(2K ritmo objetivo + 2min fácil) + volta à calma', icon: Target },
-        { day: 'Sex', type: 'Easy', duration: '30min', description: 'Recuperação entre treinos duros', icon: MapPin },
-        { day: 'Dom', type: 'Long Run', duration: '75min', description: 'Volume maior para consolidar resistência', icon: Clock },
-      ],
-    },
-    {
-      week: 14,
-      phase: 'Preparação Específica',
-      color: 'bg-orange-50 border-orange-200',
-      focus: 'Simulado de 8-9K',
-      workouts: [
-        { day: 'Seg', type: 'Easy', duration: '35min', description: 'Preparação para simulado', icon: Heart },
-        { day: 'Qua', type: 'Simulado 8K', duration: '60min', description: 'Aquecimento + 8K no ritmo que pretende fazer os 10K + volta à calma', icon: Award },
-        { day: 'Sex', type: 'Recovery', duration: '25min', description: 'Regeneração leve', icon: MapPin },
-        { day: 'Dom', type: 'Endurance', duration: '70min', description: 'Volume confortável', icon: Clock },
-      ],
-    },
-    {
-      week: 15,
-      phase: 'Polimento Final',
-      color: 'bg-purple-50 border-purple-200',
-      focus: 'Ajustes finais e confiança',
-      workouts: [
-        { day: 'Seg', type: 'Easy Run', duration: '35min', description: 'Manter ritmo e forma', icon: Heart },
-        { day: 'Qua', type: 'Sharpening', duration: '45min', description: 'Aquecimento + 3x(1K ritmo 10K + 2min recuperação) + volta à calma', icon: Zap },
-        { day: 'Sex', type: 'Easy', duration: '30min', description: 'Trote leve', icon: MapPin },
-        { day: 'Dom', type: 'Test Run', duration: '65min', description: 'Teste final de 9K ou volume equivalente', icon: Target },
-      ],
-    },
-    {
-      week: 16,
-      phase: 'Semana da Prova! 🎯',
-      color: 'bg-gradient-to-r from-yellow-50 to-gold-100 border-yellow-300',
-      focus: 'SEMANA DOS 10K - VOCÊ CONSEGUIU!',
-      workouts: [
-        { day: 'Seg', type: 'Easy', duration: '25min', description: 'Trote bem leve para manter ativo', icon: Heart },
-        { day: 'Qua', type: 'Activation', duration: '20min', description: '15min fácil + 3x100m em ritmo moderado', icon: Zap },
-        { day: 'Sex', type: 'Descanso', duration: '-', description: 'Descanso completo ou caminhada leve', icon: MapPin },
-        { day: 'Dom', type: '🏆 PROVA 10K!', duration: '80min', description: 'Aquecimento + SEUS 10K + comemoração merecida!', icon: Trophy },
-      ],
-    },
-  ], []);
+  const weeks: Week[] = useMemo(() => convertPlanJsonToWeeks(plans[selectedPlanId].data), [selectedPlanId]);
 
   useEffect(() => {
     const load = async () => {
       if (!username) return;
       setLoading(true);
       try {
-        const ref = doc(db, 'running_progress', username);
+        const ref = doc(db, 'running_progress', `${username}_${selectedPlanId}`);
         const snap = await getDoc(ref);
         if (snap.exists()) {
           const data = snap.data() as { completedWeeks?: number[]; completedWorkouts?: string[] };
-          if (data.completedWeeks) setCompletedWeeks(new Set<number>(data.completedWeeks));
-          if (data.completedWorkouts) setCompletedWorkouts(new Set<string>(data.completedWorkouts));
+          setCompletedWeeks(new Set<number>(data.completedWeeks || []));
+          setCompletedWorkouts(new Set<string>(data.completedWorkouts || []));
+        } else {
+          setCompletedWeeks(new Set());
+          setCompletedWorkouts(new Set());
         }
       } catch (err) {
         // offline fallback
@@ -263,12 +157,12 @@ const RunningPlan: React.FC = () => {
       }
     };
     load();
-  }, [username]);
+  }, [username, selectedPlanId]);
 
   const save = async (weeksSet: Set<number>, workoutsSet: Set<string>) => {
     try {
       if (!username) return;
-      const ref = doc(db, 'running_progress', username);
+      const ref = doc(db, 'running_progress', `${username}_${selectedPlanId}`);
       await setDoc(ref, {
         completedWeeks: Array.from(weeksSet),
         completedWorkouts: Array.from(workoutsSet),
@@ -295,7 +189,8 @@ const RunningPlan: React.FC = () => {
 
   const totalWorkouts = weeks.reduce((sum, week) => sum + week.workouts.length, 0);
   const completedWorkoutsCount = completedWorkouts.size;
-  const progressPercentage = Math.round((completedWorkoutsCount / totalWorkouts) * 100);
+  const progressPercentage = totalWorkouts > 0 ? Math.round((completedWorkoutsCount / totalWorkouts) * 100) : 0;
+  const nextWeek = weeks.find((week) => week.workouts.some((_, index) => !completedWorkouts.has(`${week.week}-${index}`)));
 
   const handleUsernameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -383,9 +278,23 @@ const RunningPlan: React.FC = () => {
       
       <div className="max-w-5xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-green-50">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">🏃‍♂️ Seu Plano Personalizado 10K</h1>
-        <p className="text-lg text-gray-600 mb-2">16 semanas para correr 10km confortavelmente</p>
-        <p className="text-sm text-blue-600 font-medium">Adaptado para seu nível atual: 1km contínuo {'\u2192'} 10km confortável</p>
+        <div className="flex flex-col items-center gap-3 mb-2">
+          <h1 className="text-4xl font-bold text-gray-800">🏃‍♂️ {plans[selectedPlanId].name}</h1>
+          <p className="text-lg text-gray-600">{plans[selectedPlanId].description}</p>
+          <div className="flex items-center gap-2">
+            {Object.values(plans).map((plan) => (
+              <button
+                key={plan.id}
+                onClick={() => setSelectedPlanId(plan.id)}
+                className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors ${selectedPlanId === plan.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-blue-300 hover:bg-blue-50'}`}
+                title={plan.name}
+              >
+                {plan.name}
+              </button>
+            ))}
+          </div>
+          <p className="text-sm text-blue-600 font-medium">Progresso salvo por usuário e por plano</p>
+        </div>
 
         <div className="mt-4 bg-white rounded-lg p-4 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800 mb-3">💓 Suas Zonas de FC (Frequência Cardíaca)</h3>
@@ -439,12 +348,7 @@ const RunningPlan: React.FC = () => {
           </div>
           <div className="text-sm text-gray-600">
             <strong>Próximo marco:</strong>{' '}
-            {completedWorkoutsCount < 16 ? 'Completar Base Aeróbica (Semanas 1-4)' :
-             completedWorkoutsCount < 32 ? 'Construir Resistência (Semanas 5-8)' :
-             completedWorkoutsCount < 48 ? 'Desenvolver Endurance (Semanas 9-12)' :
-             completedWorkoutsCount < 56 ? 'Preparação Específica (Semanas 13-14)' :
-             completedWorkoutsCount < 60 ? 'Polimento Final (Semana 15)' :
-             'PROVA DOS 10K! 🎯'}
+            {nextWeek ? `Semana ${nextWeek.week} - ${nextWeek.focus}` : 'Objetivo final concluído! 🎯'}
           </div>
         </div>
       </div>

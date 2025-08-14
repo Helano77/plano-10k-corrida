@@ -1,0 +1,180 @@
+{
+  "treino": [
+    {
+      "week": 1,
+      "phase": "Recuperação e Reconstrução da Base",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Curar panturrilhas e retomar volume sem dor",
+      "workouts": [
+        { "day": "Ter", "type": "Caminhada Terapêutica", "duration": "30min", "description": "Caminhada em ritmo 7-8min/km + alongamento panturrilha 10min", "icon": "Heart", "hrColor": "text-gray-600", "hr": "Zona 1 (120-135)"},
+        { "day": "Qui", "type": "Trote Regenerativo", "duration": "15min", "description": "5min caminhada + 8min trote muito suave 12-13min/km + 2min caminhada", "icon": "MapPin", "hrColor": "text-gray-600", "hr": "Zona 1-2 (120-145)"},
+        { "day": "Sab", "type": "Fortalecimento", "duration": "25min", "description": "Exercícios para panturrilha, glúteos e core + gelo nas panturrilhas", "icon": "Zap", "hrColor": "text-gray-600", "hr": "Zona 1 (120-135)"}
+      ]
+    },
+    {
+      "week": 2,
+      "phase": "Recuperação e Reconstrução da Base",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Aumentar tempo de corrida sem dor",
+      "workouts": [
+        { "day": "Ter", "type": "Corrida Suave", "duration": "20min", "description": "Aquecimento 5min + 12min corrida ritmo 11-12min/km + volta calma 3min", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"},
+        { "day": "Qui", "type": "Caminhada Ativa", "duration": "35min", "description": "Caminhada firme + exercícios dinâmicos + alongamento completo", "hrColor": "text-gray-600", "hr": "Zona 1 (120-135)"},
+        { "day": "Sab", "type": "Corrida Confortável", "duration": "25min", "description": "Aquecimento 5min + 15min corrida ritmo 10-11min/km + volta calma 5min", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"}
+      ]
+    },
+    {
+      "week": 3,
+      "phase": "Reconstrução da Base Aeróbica",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Consolidar 3km sem dor em ritmo confortável",
+      "workouts": [
+        { "day": "Ter", "type": "Corrida Base", "duration": "25min", "description": "Aquecimento 5min + 3km em ritmo 10-10:30/km + volta calma 5min", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"},
+        { "day": "Qui", "type": "Cross Training", "duration": "30min", "description": "Bicicleta ou natação + fortalecimento core e pernas", "hrColor": "text-gray-600", "hr": "Zona 1-2 (120-145)"},
+        { "day": "Sab", "type": "Corrida Longa", "duration": "30min", "description": "Aquecimento 5min + 3.5km em ritmo 10:30-11min/km + volta calma", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"}
+      ]
+    },
+    {
+      "week": 4,
+      "phase": "Reconstrução da Base Aeróbica",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Retomar 4km com confiança",
+      "workouts": [
+        { "day": "Ter", "type": "Corrida Confortável", "duration": "30min", "description": "Aquecimento 5min + 4km em ritmo 9:45-10:15/km + volta calma", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"},
+        { "day": "Qui", "type": "Fartlek Suave", "duration": "25min", "description": "5min aquecimento + 6x(1min ritmo 9min/km + 2min ritmo 11min/km) + 5min volta calma", "hrColor": "text-gray-600", "hr": "Zona 2-3 (135-165)"},
+        { "day": "Sab", "type": "Corrida Contínua", "duration": "35min", "description": "Aquecimento 5min + 4.5km em ritmo 10-10:30/km + volta calma", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"}
+      ]
+    },
+    {
+      "week": 5,
+      "phase": "Consolidação da Base - Retorno ao 5km",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Primeiro 5km pós-lesão em ritmo seguro",
+      "workouts": [
+        { "day": "Ter", "type": "Corrida Tempo", "duration": "30min", "description": "Aquecimento 5min + 3km em ritmo 9:15-9:45/km + volta calma 5min", "hrColor": "text-gray-600", "hr": "Zona 2-3 (135-160)"},
+        { "day": "Qui", "type": "Recuperação Ativa", "duration": "25min", "description": "Corrida muito suave 2.5km em ritmo 11-12min/km + alongamento", "hrColor": "text-gray-600", "hr": "Zona 1-2 (120-145)"},
+        { "day": "Sab", "type": "Teste 5km", "duration": "40min", "description": "Aquecimento 10min + 5km em ritmo 9:30-10min/km + volta calma 10min", "hrColor": "text-gray-600", "hr": "Zona 2-3 (135-160)"}
+      ]
+    },
+    {
+      "week": 6,
+      "phase": "Consolidação da Base - Retorno ao 5km",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Consolidar 5km e testar ritmos ligeiramente mais rápidos",
+      "workouts": [
+        { "day": "Ter", "type": "Corrida Intervalada", "duration": "35min", "description": "Aquecimento 8min + 4x(800m em 8:30/km + 400m recuperação 11min/km) + volta calma 7min", "hrColor": "text-gray-600", "hr": "Zona 2-3 (135-165)"},
+        { "day": "Qui", "type": "Corrida Fácil", "duration": "25min", "description": "3km em ritmo 10-10:30/km muito confortável", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"},
+        { "day": "Sab", "type": "Corrida Contínua", "duration": "40min", "description": "Aquecimento 5min + 5km em ritmo 9-9:30/km + volta calma 8min", "hrColor": "text-gray-600", "hr": "Zona 2-3 (135-160)"}
+      ]
+    },
+    {
+      "week": 7,
+      "phase": "Desenvolvimento de Velocidade Aeróbica",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Introduzir ritmos de 8-8:30/km de forma controlada",
+      "workouts": [
+        { "day": "Ter", "type": "Fartlek Progressivo", "duration": "35min", "description": "Aquecimento 8min + 8x(2min em 8-8:30/km + 1min em 10min/km) + volta calma 7min", "hrColor": "text-gray-600", "hr": "Zona 3-4 (150-175)"},
+        { "day": "Qui", "type": "Corrida Regenerativa", "duration": "25min", "description": "3km bem suave em ritmo 10:30-11min/km + exercícios de técnica", "hrColor": "text-gray-600", "hr": "Zona 1-2 (120-145)"},
+        { "day": "Sab", "type": "Tempo Run", "duration": "35min", "description": "Aquecimento 8min + 3km em ritmo 8:30-9min/km + volta calma 7min", "hrColor": "text-gray-600", "hr": "Zona 3 (150-167)"}
+      ]
+    },
+    {
+      "week": 8,
+      "phase": "Desenvolvimento de Velocidade Aeróbica",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Aumentar tempo sustentado em ritmos de prova",
+      "workouts": [
+        { "day": "Ter", "type": "Intervalos 1km", "duration": "40min", "description": "Aquecimento 10min + 3x(1km em 8min/km + 500m recuperação 10min/km) + volta calma 8min", "hrColor": "text-gray-600", "hr": "Zona 3-4 (150-175)"},
+        { "day": "Qui", "type": "Corrida Fácil", "duration": "30min", "description": "4km em ritmo 9:30-10min/km conversacional", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"},
+        { "day": "Sab", "type": "Simulado 5km", "duration": "45min", "description": "Aquecimento 12min + 5km tentativa em 8:15-8:45/km + volta calma 10min", "hrColor": "text-gray-600", "hr": "Zona 3-4 (150-175)"}
+      ]
+    },
+    {
+      "week": 9,
+      "phase": "Intensificação Controlada",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Trabalhar ritmos próximos ao objetivo (5min/km)",
+      "workouts": [
+        { "day": "Ter", "type": "Intervalos Curtos", "duration": "35min", "description": "Aquecimento 10min + 6x(400m em 7:30-8min/km + 200m recuperação) + volta calma 8min", "hrColor": "text-gray-600", "hr": "Zona 4-5 (167-185)"},
+        { "day": "Qui", "type": "Corrida Recuperação", "duration": "25min", "description": "3km muito tranquilo em ritmo 10-11min/km", "hrColor": "text-gray-600", "hr": "Zona 1-2 (120-145)"},
+        { "day": "Sab", "type": "Teste Progressivo", "duration": "40min", "description": "Aquecimento 10min + 1km(9min/km) + 1km(8min/km) + 1km(7:30/km) + 1km(8:30/km) + volta calma", "hrColor": "text-gray-600", "hr": "Zona 2-4 (135-175)"}
+      ]
+    },
+    {
+      "week": 10,
+      "phase": "Intensificação Controlada",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Consolidar velocidade e resistência para 5km sub-42min",
+      "workouts": [
+        { "day": "Ter", "type": "Fartlek Estruturado", "duration": "40min", "description": "Aquecimento 10min + 10x(1min em 7-7:30/km + 1min em 9min/km) + volta calma 10min", "hrColor": "text-gray-600", "hr": "Zona 3-4 (150-175)"},
+        { "day": "Qui", "type": "Corrida Fácil", "duration": "30min", "description": "4km confortável em ritmo 9-9:30/km", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"},
+        { "day": "Sab", "type": "5km Objetivo", "duration": "45min", "description": "Aquecimento 15min + 5km tentativa sub-42min (8:20/km médio) + volta calma 12min", "hrColor": "text-gray-600", "hr": "Zona 3-4 (150-175)"}
+      ]
+    },
+    {
+      "week": 11,
+      "phase": "Polimento para Objetivo Final",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Preparar para 5km sub-40min (8min/km)",
+      "workouts": [
+        { "day": "Ter", "type": "Intervalos Tempo", "duration": "35min", "description": "Aquecimento 10min + 4x(800m em 7:45/km + 400m recuperação 9min/km) + volta calma 8min", "hrColor": "text-gray-600", "hr": "Zona 4 (167-180)"},
+        { "day": "Qui", "type": "Trote Suave", "duration": "25min", "description": "3km bem leve em ritmo 10min/km + mobilidade", "hrColor": "text-gray-600", "hr": "Zona 1-2 (120-145)"},
+        { "day": "Sab", "type": "Simulado 5km", "duration": "40min", "description": "Aquecimento 12min + 5km em 7:45-8:15/km + volta calma 10min", "hrColor": "text-gray-600", "hr": "Zona 3-4 (150-175)"}
+      ]
+    },
+    {
+      "week": 12,
+      "phase": "Polimento para Objetivo Final",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Últimos ajustes antes do teste final",
+      "workouts": [
+        { "day": "Ter", "type": "Velocidade Neuromuscular", "duration": "30min", "description": "Aquecimento 10min + 8x(200m em 6:30-7min/km + 200m caminhada) + volta calma 8min", "hrColor": "text-gray-600", "hr": "Zona 4-5 (167-185)"},
+        { "day": "Qui", "type": "Corrida Regenerativa", "duration": "20min", "description": "2.5km muito suave em ritmo 10:30min/km", "hrColor": "text-gray-600", "hr": "Zona 1 (120-135)"},
+        { "day": "Sab", "type": "TESTE FINAL", "duration": "50min", "description": "Aquecimento 15min + 5KM OFICIAL SUB-40MIN + volta calma 15min", "hrColor": "text-gray-600", "hr": "Zona 3-4 (150-175)"}
+      ]
+    },
+    {
+      "week": 13,
+      "phase": "Refinamento para Sub-35min",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Trabalhar ritmos de 7min/km para 5km sub-35min",
+      "workouts": [
+        { "day": "Ter", "type": "Intervalos Longos", "duration": "40min", "description": "Aquecimento 10min + 3x(1200m em 7:15/km + 600m recuperação 9min/km) + volta calma 10min", "hrColor": "text-gray-600", "hr": "Zona 4 (167-180)"},
+        { "day": "Qui", "type": "Corrida Fácil", "duration": "30min", "description": "4km em ritmo 8:30-9min/km confortável", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"},
+        { "day": "Sab", "type": "Tempo Run Longo", "duration": "40min", "description": "Aquecimento 10min + 4km em ritmo 7:30-8min/km + volta calma 8min", "hrColor": "text-gray-600", "hr": "Zona 3-4 (150-175)"}
+      ]
+    },
+    {
+      "week": 14,
+      "phase": "Refinamento para Sub-35min",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Consolidar ritmo de 7min/km",
+      "workouts": [
+        { "day": "Ter", "type": "Fartlek Rápido", "duration": "35min", "description": "Aquecimento 10min + 12x(1min em 6:30-7min/km + 1min em 8:30min/km) + volta calma 8min", "hrColor": "text-gray-600", "hr": "Zona 4-5 (167-185)"},
+        { "day": "Qui", "type": "Recuperação", "duration": "25min", "description": "3km suave em ritmo 9-9:30/km", "hrColor": "text-gray-600", "hr": "Zona 2 (135-150)"},
+        { "day": "Sab", "type": "Teste Sub-35", "duration": "45min", "description": "Aquecimento 15min + 5km tentativa sub-35min (7min/km) + volta calma 12min", "hrColor": "text-gray-600", "hr": "Zona 4 (167-180)"}
+      ]
+    },
+    {
+      "week": 15,
+      "phase": "Aproximação do Objetivo Final",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Trabalhar ritmos de 5min/km para 5km sub-25min",
+      "workouts": [
+        { "day": "Ter", "type": "Intervalos Específicos", "duration": "40min", "description": "Aquecimento 12min + 5x(800m em 5:30-6min/km + 400m recuperação 8min/km) + volta calma 10min", "hrColor": "text-gray-600", "hr": "Zona 5 (180-190)"},
+        { "day": "Qui", "type": "Corrida Aeróbica", "duration": "30min", "description": "4km em ritmo 7:30-8min/km", "hrColor": "text-gray-600", "hr": "Zona 3 (150-167)"},
+        { "day": "Sab", "type": "Simulado Sub-30", "duration": "45min", "description": "Aquecimento 15min + 5km em 5:30-6min/km + volta calma 12min", "hrColor": "text-gray-600", "hr": "Zona 4-5 (167-185)"}
+      ]
+    },
+    {
+      "week": 16,
+      "phase": "Teste Final Sub-25min",
+      "color": "bg-blue-50 border-blue-200",
+      "focus": "Executar 5km em ritmo 5min/km",
+      "workouts": [
+        { "day": "Ter", "type": "Ativação", "duration": "25min", "description": "Aquecimento 10min + 4x(400m em 5min/km + 200m caminhada) + volta calma 8min", "hrColor": "text-gray-600", "hr": "Zona 4-5 (167-185)"},
+        { "day": "Qui", "type": "Recuperação Ativa", "duration": "20min", "description": "2km muito suave em ritmo 9min/km + alongamento", "hrColor": "text-gray-600", "hr": "Zona 1-2 (120-145)"},
+        { "day": "Sab", "type": "🎯 OBJETIVO FINAL", "duration": "55min", "description": "Aquecimento 20min + 5KM SUB-25MIN (5min/km) + volta calma 20min", "hrColor": "text-gray-600", "hr": "Zona 4-5 (167-185)"}
+      ]
+    }
+  ]
+}
