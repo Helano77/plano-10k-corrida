@@ -21,28 +21,18 @@ type Week = {
   workouts: Workout[];
 };
 
-const USER_ID_STORAGE_KEY = 'running_plan_user_id_v1';
-
-const useUserId = (): string => {
-  const [userId, setUserId] = useState<string>('');
-  useEffect(() => {
-    const existing = localStorage.getItem(USER_ID_STORAGE_KEY);
-    if (existing) {
-      setUserId(existing);
-      return;
-    }
-    const generated = `user_${Math.random().toString(36).slice(2, 10)}`;
-    localStorage.setItem(USER_ID_STORAGE_KEY, generated);
-    setUserId(generated);
-  }, []);
-  return userId;
+const useUsername = (): [string, (username: string) => void] => {
+  const [username, setUsername] = useState<string>('');
+  return [username, setUsername];
 };
 
 const RunningPlan: React.FC = () => {
   const [completedWeeks, setCompletedWeeks] = useState<Set<number>>(new Set());
   const [completedWorkouts, setCompletedWorkouts] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState<boolean>(true);
-  const userId = useUserId();
+  const [username, setUsername] = useUsername();
+  const [usernameInput, setUsernameInput] = useState<string>('');
+  const [showUsernameForm, setShowUsernameForm] = useState<boolean>(true);
 
   const weeks: Week[] = useMemo(() => [
     {
@@ -241,9 +231,10 @@ const RunningPlan: React.FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      if (!userId) return;
+      if (!username) return;
+      setLoading(true);
       try {
-        const ref = doc(db, 'running_progress', userId);
+        const ref = doc(db, 'running_progress', username);
         const snap = await getDoc(ref);
         if (snap.exists()) {
           const data = snap.data() as { completedWeeks?: number[]; completedWorkouts?: string[] };
@@ -257,12 +248,12 @@ const RunningPlan: React.FC = () => {
       }
     };
     load();
-  }, [userId]);
+  }, [username]);
 
   const save = async (weeksSet: Set<number>, workoutsSet: Set<string>) => {
     try {
-      if (!userId) return;
-      const ref = doc(db, 'running_progress', userId);
+      if (!username) return;
+      const ref = doc(db, 'running_progress', username);
       await setDoc(ref, {
         completedWeeks: Array.from(weeksSet),
         completedWorkouts: Array.from(workoutsSet),
@@ -291,6 +282,53 @@ const RunningPlan: React.FC = () => {
   const completedWorkoutsCount = completedWorkouts.size;
   const progressPercentage = Math.round((completedWorkoutsCount / totalWorkouts) * 100);
 
+  const handleUsernameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (usernameInput.trim()) {
+      const cleanUsername = usernameInput.startsWith('@') ? usernameInput.slice(1) : usernameInput;
+      if (cleanUsername.trim()) {
+        setUsername(cleanUsername.trim());
+        setShowUsernameForm(false);
+      }
+    }
+  };
+
+  if (showUsernameForm) {
+    return (
+      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg mt-20">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">🏃‍♂️ Plano 10K</h1>
+          <p className="text-gray-600">Digite seu nome de usuário para carregar seu progresso</p>
+        </div>
+        <form onSubmit={handleUsernameSubmit}>
+          <div className="mb-4">
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              Nome de usuário
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">@</span>
+              <input
+                type="text"
+                id="username"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="seu_nome_usuario"
+                required
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Carregar Progresso
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -305,7 +343,15 @@ const RunningPlan: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-green-50">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">🏃‍♂️ Seu Plano Personalizado 10K</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-4xl font-bold text-gray-800">🏃‍♂️ Seu Plano Personalizado 10K</h1>
+          <button
+            onClick={() => setShowUsernameForm(true)}
+            className="text-sm text-blue-600 hover:text-blue-800 underline"
+          >
+            Trocar usuário (@{username})
+          </button>
+        </div>
         <p className="text-lg text-gray-600 mb-2">16 semanas para correr 10km confortavelmente</p>
         <p className="text-sm text-blue-600 font-medium">Adaptado para seu nível atual: 1km contínuo {'\u2192'} 10km confortável</p>
 
